@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <unordered_set>
-#include <vector>
+#include <list>
 
 using namespace std;
 
@@ -74,28 +74,32 @@ int aliveAround(unordered_set<int> &set, int i, int j)
 
 void startGame(unordered_set<int> &set, int max_iterations)
 {
-    vector<pair<int, bool>> v;
+    list<pair<int, bool>> l;
     for (int it = 0; it < max_iterations; it++)
     {
-        v.clear();
+
         for (int i = 0; i < SIZE; i++)
         {
             for (int j = 0; j < SIZE; j++)
             {
                 int alive = aliveAround(set, i, j);
                 if (calcState(set, i, j, alive) && !entry(set, i, j))
-                    v.push_back(make_pair(generateKey(i, j), true));
+                    l.push_back(make_pair(generateKey(i, j), true));
                 else if (!calcState(set, i, j, alive) && entry(set, i, j))
-                    v.push_back(make_pair(generateKey(i, j), false));
+                    l.push_back(make_pair(generateKey(i, j), false));
             }
         }
 
-        for (pair<int, bool> x : v)
+        list<pair<int, bool>>::iterator i = l.begin();
+        while (i != l.end())
         {
+            pair<int, bool> x = *i;
             if (x.second)
                 set.insert(x.first);
             else
                 set.erase(x.first);
+
+            l.erase(i++);
         }
         printUniverse(set);
     }
