@@ -19,7 +19,7 @@ void printUniverse(unordered_set<int> &set)
         for (int j = 0; j < SIZE; j++)
         {
             if (set.find(generateKey(i, j)) == set.end())
-                cout << "0 ";
+                cout << ". ";
             else
                 cout << "1 ";
         }
