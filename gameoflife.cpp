@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <unordered_set>
+#include <vector>
 
 using namespace std;
 
@@ -37,17 +38,17 @@ void initializeGliderUniverse(unordered_set<int> &set)
     set.insert(generateKey(x - 1, x));
 }
 
-int entry(unordered_set<int> &set, int i, int j)
+bool entry(unordered_set<int> &set, int i, int j)
 {
-    return (set.find(generateKey(i, j)) == set.end()) ? 0 : 1;
+    return (set.find(generateKey(i, j)) == set.end()) ? false : true;
 }
 
 int calcState(unordered_set<int> &set, int i, int j, int alive)
 {
-    if ((alive < 2 || alive > 3) && entry(set, i, j) == 1)
-        return 0;
-    else if (alive == 3 && entry(set, i, j) == 0)
-        return 1;
+    if ((alive < 2 || alive > 3) && entry(set, i, j))
+        return false;
+    else if (alive == 3 && entry(set, i, j) == false)
+        return true;
     else
         return entry(set, i, j);
 }
@@ -63,7 +64,8 @@ int aliveAround(unordered_set<int> &set, int i, int j)
             {
                 if (x == 0 && y == 0)
                     continue;
-                alive += entry(set, x + i, y + j);
+                if (entry(set, x + i, y + j))
+                    alive++;
             }
         }
     }
@@ -72,20 +74,29 @@ int aliveAround(unordered_set<int> &set, int i, int j)
 
 void startGame(unordered_set<int> &set, int max_iterations)
 {
-    unordered_set<int> set2;
+    vector<pair<int, bool>> v;
     for (int it = 0; it < max_iterations; it++)
     {
-        set2.clear();
+        v.clear();
         for (int i = 0; i < SIZE; i++)
         {
             for (int j = 0; j < SIZE; j++)
             {
                 int alive = aliveAround(set, i, j);
-                if (calcState(set, i, j, alive) == 1)
-                    set2.insert(generateKey(i, j));
+                if (calcState(set, i, j, alive) && !entry(set, i, j))
+                    v.push_back(make_pair(generateKey(i, j), true));
+                else if (!calcState(set, i, j, alive) && entry(set, i, j))
+                    v.push_back(make_pair(generateKey(i, j), false));
             }
         }
-        set = set2;
+
+        for (pair<int, bool> x : v)
+        {
+            if (x.second)
+                set.insert(x.first);
+            else
+                set.erase(x.first);
+        }
         printUniverse(set);
     }
 }
